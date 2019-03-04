@@ -32,6 +32,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // 若未定义render方法则解析template/el字符成render（在 Vue 2.0 版本中，所有 Vue 的组件的渲染最终都需要 render 方法）
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -62,7 +63,7 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+// compileToFunctions：在线编译方法，将template解析出render等
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
