@@ -20,7 +20,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * In some cases we may want to disable observation inside a component's
- * update computation.
+ * update computation.某些时候我们可能想取消observation在一个组件的更新计算里。
  */
 export let shouldObserve: boolean = true
 
@@ -33,6 +33,8 @@ export function toggleObserving (value: boolean) {
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
+ * Observer类attached于每一个observed的对象，
+ * 一旦attached了，observer将对象属性转化为getter/setter以便收集依赖并派发更新
  */
 export class Observer {
   value: any;
@@ -43,7 +45,8 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
+    // 开发中输出 data 上对象类型的数据，会发现该对象多了一个 __ob__ 的属性(this)。
+    def(value, '__ob__', this)//通过执行 def 函数把自身实例添加到数据对象 value 的 __ob__ 属性上,
     if (Array.isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods)
@@ -60,6 +63,7 @@ export class Observer {
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
+   * 遍历并转换所有属性，只针对对象
    */
   walk (obj: Object) {
     const keys = Object.keys(obj)
@@ -69,7 +73,7 @@ export class Observer {
   }
 
   /**
-   * Observe a list of Array items.
+   * Observe a list of Array items.观察数组
    */
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
@@ -106,6 +110,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * 为每个值创建一个observer，若成功被observed返回新的observer或者已存在的observer（给非 VNode 的对象类型数据添加一个 Observer）。
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
@@ -131,6 +136,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ * 先实例话Dep对象，再获取obj的key属性描述符，然后对子对象递归调用 observe 方法
+ *  
  */
 export function defineReactive (
   obj: Object,
@@ -146,7 +153,7 @@ export function defineReactive (
     return
   }
 
-  // cater for pre-defined getter/setters
+  // cater for pre-defined getter/setters为预定义的
   const getter = property && property.get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
@@ -180,7 +187,7 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
-      // #7981: for accessor properties without setter
+      // #7981: for accessor properties without setter（不允许）
       if (getter && !setter) return
       if (setter) {
         setter.call(obj, newVal)

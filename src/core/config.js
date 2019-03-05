@@ -34,7 +34,7 @@ export type Config = {
   // legacy
   _lifecycleHooks: Array<string>;
 };
-
+// 自身定义一些默认配置，同时可以在初始化阶段传入一些定义配置，然后去 merge 默认配置，来达到定制化不同需求的目的
 export default ({
   /**
    * Option merge strategies (used in core/util/options)

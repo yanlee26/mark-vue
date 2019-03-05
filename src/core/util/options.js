@@ -450,7 +450,7 @@ export function resolveAsset (
     return
   }
   const assets = options[type]
-  // check local registration variations first
+  // check local registration variations first 全局注册组件的时候，id 可以是连字符、驼峰或首字母大写的形式。
   if (hasOwn(assets, id)) return assets[id]
   const camelizedId = camelize(id)
   if (hasOwn(assets, camelizedId)) return assets[camelizedId]

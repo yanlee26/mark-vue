@@ -55,21 +55,21 @@ if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
 }
 
 /**
- * Flush both queues and run the watchers.
+ * Flush both queues and run the watchers.flush queues并跑watchers
  */
 function flushSchedulerQueue () {
   currentFlushTimestamp = getNow()
   flushing = true
   let watcher, id
 
-  // Sort queue before flush.
-  // This ensures that:
+  // Sort queue before flush.flush前对queue排序
+  // This ensures that:为保证
   // 1. Components are updated from parent to child. (because parent is always
-  //    created before the child)
+  //    created before the child)组件从父到子更新（因父先于子被创建）
   // 2. A component's user watchers are run before its render watcher (because
-  //    user watchers are created before the render watcher)
+  //    user watchers are created before the render watcher)一个组件的user watchers跑在其render watchers之前（同上）
   // 3. If a component is destroyed during a parent component's watcher run,
-  //    its watchers can be skipped.
+  //    its watchers can be skipped.若一个组件在一个父组件的watcher 跑期间被销毁，其watchers可跳过
   queue.sort((a, b) => a.id - b.id)
 
   // do not cache length because more watchers might be pushed
@@ -105,7 +105,7 @@ function flushSchedulerQueue () {
 
   resetSchedulerState()
 
-  // call component updated and activated hooks
+  // call component updated and activated hooks调用组件hooks
   callActivatedHooks(activatedQueue)
   callUpdatedHooks(updatedQueue)
 
@@ -149,6 +149,9 @@ function callActivatedHooks (queue) {
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
+ * 将一个watcher推入watcher队列。有重复id的jobs将被跳过除非当队列正被flushed时被推入。
+ * 观察队列：并不会每次数据改变都触发 watcher 的回调，而是把这些 watcher 先添加到一个队列里，
+ * 然后在 nextTick 后执行 flushSchedulerQueue。
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id

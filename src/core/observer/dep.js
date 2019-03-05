@@ -9,9 +9,10 @@ let uid = 0
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * 一个dep是一个可以有很多指令订阅它的观察器
  */
 export default class Dep {
-  static target: ?Watcher;
+  static target: ?Watcher;//全局唯一的watcher。非常巧妙的设计，因为在同一时间只能有一个全局的 Watcher 被计算
   id: number;
   subs: Array<Watcher>;
 
@@ -35,7 +36,7 @@ export default class Dep {
   }
 
   notify () {
-    // stabilize the subscriber list first
+    // stabilize the subscriber list first首先要保证subscriber的稳定性（纯函数）
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async

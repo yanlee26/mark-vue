@@ -34,7 +34,7 @@ const sharedPropertyDefinition = {
   get: noop,
   set: noop
 }
-
+// 属性访问代理：把 target[sourceKey][key] 的读写变成了对 target[key] 的读写
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -44,7 +44,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
-
+// 初始化props、methods、data、computed 和 wathcer 等属性
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -68,10 +68,11 @@ function initProps (vm: Component, propsOptions: Object) {
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
-  // root instance props should be converted
+  // root instance props should be converted根实例props应当被转换
   if (!isRoot) {
     toggleObserving(false)
   }
+  // 使个属性成员响应式化
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
@@ -101,9 +102,9 @@ function initProps (vm: Component, propsOptions: Object) {
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
+    // instantiation here.静态props在Vue.extend()时已经在组件原型上被proxy了。我们仅需要代理定义在这的props
     if (!(key in vm)) {
-      proxy(vm, `_props`, key)
+      proxy(vm, `_props`, key)//vm._props.xxx 的访问代理到 vm.xxx 上
     }
   }
   toggleObserving(true)
@@ -113,7 +114,7 @@ function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
-    : data || {}
+    : data || {} //根据data类型（使用vue的方式）获取data
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -144,10 +145,10 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
-      proxy(vm, `_data`, key)
+      proxy(vm, `_data`, key)//1.代理data访问
     }
   }
-  // observe data
+  // observe data 响应式化
   observe(data, true /* asRootData */)
 }
 

@@ -25,7 +25,8 @@ function ensureCtor (comp: any, base) {
     ? base.extend(comp)
     : comp
 }
-
+// 异步组件实现的本质是 2 次渲染，除了 0 delay 的高级异步组件第一次直接渲染成 loading 组件外，
+// 其它都是第一次渲染生成一个注释节点，当异步获取组件成功后，再通过 forceRender 强制重新渲染，这样就能正确渲染出我们异步加载的组件了。
 export function createAsyncPlaceholder (
   factory: Function,
   data: ?VNodeData,

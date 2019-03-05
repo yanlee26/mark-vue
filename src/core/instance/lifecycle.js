@@ -38,10 +38,10 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    parent.$children.push(vm)
+    parent.$children.push(vm)//把当前的 vm 存储到父实例的 $children 中
   }
 
-  vm.$parent = parent
+  vm.$parent = parent//保留当前 vm 的父实例
   vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
@@ -102,12 +102,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     callHook(vm, 'beforeDestroy')
     vm._isBeingDestroyed = true
-    // remove self from parent
+    // 一些列销毁操作
+    // 1.remove self from parent从父级删除自己
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
-    // teardown watchers
+    // 2.teardown watchers撕毁watchers
     if (vm._watcher) {
       vm._watcher.teardown()
     }
@@ -115,14 +116,15 @@ export function lifecycleMixin (Vue: Class<Component>) {
     while (i--) {
       vm._watchers[i].teardown()
     }
-    // remove reference from data ob
+    // 3.remove reference from data ob移除引用
     // frozen object may not have observer.
     if (vm._data.__ob__) {
       vm._data.__ob__.vmCount--
     }
     // call the last hook...
     vm._isDestroyed = true
-    // invoke destroy hooks on current rendered tree
+    // invoke destroy hooks on current rendered tree：
+    // 触发它子组件的销毁钩子函数，这样一层层的递归调用，先子后父，和 mounted 过程一样。
     vm.__patch__(vm._vnode, null)
     // fire destroyed hook
     callHook(vm, 'destroyed')
@@ -140,6 +142,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
 }
 // 先调用 vm._render 方法先生成虚拟 Node，再实例化一个渲染Watcher，
 // 在它的回调函数中会调用 updateComponent 方法，最终调用 vm._update 更新 DOM。
+// MARK：在执行 vm._render() 函数渲染 VNode 之前，执行了 beforeMount 钩子函数，
+// 在执行完 vm._update() 把 VNode patch 到真实 DOM 后，执行 mouted 钩子。
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -166,7 +170,7 @@ export function mountComponent (
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount')//FLAG：1
 
   let updateComponent
   /* istanbul ignore if */
@@ -178,7 +182,7 @@ export function mountComponent (
       const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
-      const vnode = vm._render()
+      const vnode = vm._render()//FLAG：2
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
 
@@ -189,7 +193,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      vm._update(vm._render(), hydrating)//FLAG：2
     }
   }
 
@@ -199,7 +203,7 @@ export function mountComponent (
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
-        callHook(vm, 'beforeUpdate')
+        callHook(vm, 'beforeUpdate')//FLAG：3 vm，mouted之后到被销毁之前
       }
     }
   }, true /* isRenderWatcher */)
@@ -207,9 +211,9 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
-  if (vm.$vnode == null) {//vm.$vnode 表示 Vue 实例的父虚拟 Node，所以它为 Null 则表示当前是根 Vue 的实例。
+  if (vm.$vnode == null) {//vm.$vnode 表示 Vue 实例的父虚拟 Node，所以它为 Null 则表示当前是根 Vue 的实例。这不是一次组件的初始化过程
     vm._isMounted = true
-    callHook(vm, 'mounted')
+    callHook(vm, 'mounted')//FLAG：4
   }
   return vm
 }
@@ -334,9 +338,9 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
     callHook(vm, 'deactivated')
   }
 }
-
+// 调用某个生命周期钩子注册的所有回调函数。
 export function callHook (vm: Component, hook: string) {
-  // #7573 disable dep collection when invoking lifecycle hooks
+  // #7573 disable dep collection when invoking lifecycle hooks调用钩子时disable掉订阅收集
   pushTarget()
   const handlers = vm.$options[hook]
   const info = `${hook} hook`

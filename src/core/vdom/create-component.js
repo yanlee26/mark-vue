@@ -46,7 +46,7 @@ const componentVNodeHooks = {
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
-      // kept-alive components, treat as a patch
+      // kept-alive components, treat as a patch将keep-alive组件视为patch
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
@@ -77,7 +77,7 @@ const componentVNodeHooks = {
     } = vnode
     if (!componentInstance._isMounted) {
       componentInstance._isMounted = true
-      callHook(componentInstance, 'mounted')
+      callHook(componentInstance, 'mounted')//对于同步渲染的子组件而言，mounted 钩子函数的执行顺序也是先子后父。
     }
     if (vnode.data.keepAlive) {
       if (context._isMounted) {

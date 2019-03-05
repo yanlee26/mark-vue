@@ -9,7 +9,7 @@ export let isUsingMicroTask = false
 
 const callbacks = []
 let pending = false
-
+// 执行队列
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
@@ -73,7 +73,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
   // Techinically it leverages the (macro) task queue,
-  // but it is still a better choice than setTimeout.
+  // but it is still a better choice than setTimeout.高版本IE
   timerFunc = () => {
     setImmediate(flushCallbacks)
   }
