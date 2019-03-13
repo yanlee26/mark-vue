@@ -101,7 +101,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
   if (Array.isArray(handler)) {
     return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
-
+// 针对是否是方法路径，函数表达式，函数调用三种情况分别处理
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
   const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))

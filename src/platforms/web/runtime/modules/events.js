@@ -28,7 +28,7 @@ function normalizeEvents (on) {
 }
 
 let target: any
-
+// 多种实现方式之一
 function createOnceHandler (event, handler, capture) {
   const _target = target // save current target element in closure
   return function onceHandler () {
@@ -41,9 +41,9 @@ function createOnceHandler (event, handler, capture) {
 
 // #9446: Firefox <= 53 (in particular, ESR 52) has incorrect Event.timeStamp
 // implementation and does not fire microtasks in between event propagation, so
-// safe to exclude.
+// safe to exclude.兼容FF
 const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53)
-
+// 原生添加事件
 function add (
   name: string,
   handler: Function,
@@ -52,10 +52,11 @@ function add (
 ) {
   // async edge case #6566: inner click event triggers patch, event handler
   // attached to outer element during patch, and triggered again. This
-  // happens because browsers fire microtask ticks between event propagation.
+  // happens because browsers fire microtask ticks between event propagation（事件冒泡阶段执行的micortask）.
   // the solution is simple: we save the timestamp when a handler is attached,
   // and the handler would only fire if the event passed to it was fired
-  // AFTER it was attached.
+  // AFTER it was attached.简单处理就是：我们在附加处理程序时保存时间戳，
+  //如果传递给它的事件在被附加后被触发，则处理程序将仅被触发。
   if (useMicrotaskFix) {
     const attachedTimestamp = currentFlushTimestamp
     const original = handler

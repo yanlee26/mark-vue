@@ -263,11 +263,11 @@ export function genData (el: ASTElement, state: CodegenState): string {
     data += `${genHandlers(el.nativeEvents, true)},`
   }
   // slot target
-  // only for non-scoped slots
+  // only for non-scoped slots非作用域插槽
   if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
-  // scoped slots
+  // scoped slots作用域插槽
   if (el.scopedSlots) {
     data += `${genScopedSlots(el, el.scopedSlots, state)},`
   }

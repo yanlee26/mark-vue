@@ -594,7 +594,17 @@ function processOnce (el) {
   }
 }
 
-// handle content being passed to a component as slot,
+/**
+ * 普通插槽：在父组件编译和渲染阶段生成 vnodes，
+ * 所以数据的作用域是·父组件实例·，子组件渲染的时候直接拿到这些渲染好的 vnodes。
+ * 
+ * 作用域插槽：父组件在编译和渲染阶段并不会直接生成 vnodes，而是在父节点 vnode 的 data 中保留一个 scopedSlots 对象，
+ * 存储着不同名称的插槽以及它们对应的渲染函数，只有在编译和渲染子组件阶段才会执行这个渲染函数生成 vnodes，
+ * 由于是在子组件环境执行的，所以对应的数据作用域是·子组件实例·。
+
+ 简单地说，两种插槽的目的都是让子组件 slot 占位符生成的内容由父组件来决定，但数据的作用域会根据它们 vnodes 渲染时机不同而不同。
+ */
+// handle content being passed to a component as slot,处理slot传入的内容
 // e.g. <template slot="xxx">, <div slot-scope="xxx">
 function processSlotContent (el) {
   let slotScope
@@ -633,6 +643,8 @@ function processSlotContent (el) {
     el.slotTargetDynamic = !!(el.attrsMap[':slot'] || el.attrsMap['v-bind:slot'])
     // preserve slot as an attribute for native shadow DOM compat
     // only for non-scoped slots.
+    //遇到 slot 标签的时候会给对应的 AST 元素节点添加 slotTarget 属性，然后在 codegen 阶段，
+    // 会判断如果当前 AST 元素节点是 slot 标签，则执行 genSlot 函数
     if (el.tag !== 'template' && !el.slotScope) {
       addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
     }
@@ -730,7 +742,7 @@ function getSlotName (binding) {
     : { name: `"${name}"`, dynamic: false }
 }
 
-// handle <slot/> outlets
+// handle <slot/> outlets处理slot出口
 function processSlotOutlet (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')

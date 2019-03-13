@@ -10,7 +10,7 @@ import {
   isTrue,
   isPlainObject
 } from 'shared/util'
-
+// 规范化
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
@@ -49,7 +49,7 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
   invoker.fns = fns
   return invoker
 }
-
+// 更新监听
 export function updateListeners (
   on: Object,
   oldOn: Object,
@@ -59,6 +59,7 @@ export function updateListeners (
   vm: Component
 ) {
   let name, def, cur, old, event
+  //添加新监听
   for (name in on) {
     def = cur = on[name]
     old = oldOn[name]
@@ -81,11 +82,12 @@ export function updateListeners (
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
       add(event.name, cur, event.capture, event.passive, event.params)
-    } else if (cur !== old) {
+    } else if (cur !== old) {//保证了事件回调只添加一次，之后仅仅去修改它的回调函数的引用
       old.fns = cur
       on[name] = old
     }
   }
+  //移除旧监听
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name)

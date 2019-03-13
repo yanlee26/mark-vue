@@ -5,7 +5,9 @@ import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 let warn
-
+/**
+ * 本质上就是一种语法糖，它即可以支持原生表单元素，也可以支持自定义组件。
+ */
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
 export const RANGE_TOKEN = '__r'
@@ -166,6 +168,12 @@ function genDefaultModel (
   if (needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
+  // input 实现 v-model 的精髓，通过修改 AST 元素，给 el 添加一个 prop，相当于我们在
+  //  input 上动态绑定了 value，又给 el 添加了事件处理，相当于在 input 上绑定了 input 事件
+ ` <input
+  v-bind:value="message"
+  v-on:input="message=$event.target.value">`
+
 
   addProp(el, 'value', `(${value})`)
   addHandler(el, event, code, null, true)

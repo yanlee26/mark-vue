@@ -175,7 +175,7 @@ export function createComponent(
   }
 
   // extract listeners, since these needs to be treated as
-  // child component listeners instead of DOM listeners
+  // child component listeners instead of DOM listeners拆开listens，由于这些需要作为子组件listens而非DOMlistens对待
   const listeners = data.on
   // replace with listeners with .native modifier
   // so it gets processed during parent component patch.
