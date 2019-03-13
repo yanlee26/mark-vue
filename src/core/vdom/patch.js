@@ -68,6 +68,12 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   }
   return map
 }
+/**
+ * 组件更新的过程核心就是新旧 vnode diff，对新旧节点相同以及不同的情况分别做不同的处理。
+ * 新旧节点不同的更新流程是创建新节点->更新父占位符节点->删除旧节点；
+ * 而新旧节点相同的更新流程是去获取它们的 children，根据不同情况做不同的更新逻辑。
+ * 最复杂的情况是新旧节点相同且它们都存在子节点，那么会执行 updateChildren 逻辑
+ */
 // patch方法构造器
 export function createPatchFunction (backend) {
   let i, j

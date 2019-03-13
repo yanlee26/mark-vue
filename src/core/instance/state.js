@@ -166,7 +166,7 @@ export function getData (data: Function, vm: Component): any {
 }
 
 const computedWatcherOptions = { lazy: true }
-
+// 初始化计算属性
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
@@ -184,7 +184,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
-      // create internal watcher for the computed property.
+      // create internal watcher for the computed property.为每一个 getter 创建一个 watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -213,6 +213,7 @@ export function defineComputed (
   key: string,
   userDef: Object | Function
 ) {
+  // 是否缓存
   const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache

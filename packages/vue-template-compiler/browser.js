@@ -5174,11 +5174,11 @@
     template,
     options
   ) {
-    var ast = parse(template.trim(), options);
+    var ast = parse(template.trim(), options);//解析模板字符串生成 AST
     if (options.optimize !== false) {
-      optimize(ast, options);
+      optimize(ast, options);//优化语法树
     }
-    var code = generate(ast, options);
+    var code = generate(ast, options);//生成代码
     return {
       ast: ast,
       render: code.render,

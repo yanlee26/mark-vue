@@ -36,19 +36,19 @@ export function createCompilerCreator (baseCompile: Function): Function {
             (tip ? tips : errors).push(data)
           }
         }
-        // merge custom modules
+        // merge custom modules自定义模块
         if (options.modules) {
           finalOptions.modules =
             (baseOptions.modules || []).concat(options.modules)
         }
-        // merge custom directives
+        // merge custom directives自定义指令
         if (options.directives) {
           finalOptions.directives = extend(
             Object.create(baseOptions.directives || null),
             options.directives
           )
         }
-        // copy other options
+        // copy other options其它
         for (const key in options) {
           if (key !== 'modules' && key !== 'directives') {
             finalOptions[key] = options[key]
@@ -57,7 +57,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       }
 
       finalOptions.warn = warn
-
+      // 执行编译
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)

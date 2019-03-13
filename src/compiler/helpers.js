@@ -1,53 +1,71 @@
 /* @flow */
 
-import { emptyObject } from 'shared/util'
-import { parseFilters } from './parser/filter-parser'
+import {
+  emptyObject
+} from 'shared/util'
+import {
+  parseFilters
+} from './parser/filter-parser'
 
-type Range = { start?: number, end?: number };
+type Range = {
+  start ? : number,
+  end ? : number
+};
 
 /* eslint-disable no-unused-vars */
-export function baseWarn (msg: string, range?: Range) {
+export function baseWarn(msg: string, range ? : Range) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 /* eslint-enable no-unused-vars */
 
-export function pluckModuleFunction<F: Function> (
-  modules: ?Array<Object>,
-  key: string
-): Array<F> {
-  return modules
-    ? modules.map(m => m[key]).filter(_ => _)
-    : []
+export function pluckModuleFunction < F: Function > (
+  modules: ? Array < Object > ,
+  key : string
+): Array < F > {
+  return modules ?
+    modules.map(m => m[key]).filter(_ => _) :
+    []
 }
 
-export function addProp (el: ASTElement, name: string, value: string, range?: Range, dynamic?: boolean) {
-  (el.props || (el.props = [])).push(rangeSetItem({ name, value, dynamic }, range))
+export function addProp(el: ASTElement, name: string, value: string, range ? : Range, dynamic ? : boolean) {
+  (el.props || (el.props = [])).push(rangeSetItem({
+    name,
+    value,
+    dynamic
+  }, range))
   el.plain = false
 }
 
-export function addAttr (el: ASTElement, name: string, value: any, range?: Range, dynamic?: boolean) {
-  const attrs = dynamic
-    ? (el.dynamicAttrs || (el.dynamicAttrs = []))
-    : (el.attrs || (el.attrs = []))
-  attrs.push(rangeSetItem({ name, value, dynamic }, range))
+export function addAttr(el: ASTElement, name: string, value: any, range ? : Range, dynamic ? : boolean) {
+  const attrs = dynamic ?
+    (el.dynamicAttrs || (el.dynamicAttrs = [])) :
+    (el.attrs || (el.attrs = []))
+  attrs.push(rangeSetItem({
+    name,
+    value,
+    dynamic
+  }, range))
   el.plain = false
 }
 
 // add a raw attr (use this in preTransforms)
-export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
+export function addRawAttr(el: ASTElement, name: string, value: any, range ? : Range) {
   el.attrsMap[name] = value
-  el.attrsList.push(rangeSetItem({ name, value }, range))
+  el.attrsList.push(rangeSetItem({
+    name,
+    value
+  }, range))
 }
 
-export function addDirective (
+export function addDirective(
   el: ASTElement,
   name: string,
   rawName: string,
   value: string,
-  arg: ?string,
-  isDynamicArg: boolean,
-  modifiers: ?ASTModifiers,
-  range?: Range
+  arg: ? string,
+  isDynamicArg : boolean,
+  modifiers: ? ASTModifiers,
+  range ? : Range
 ) {
   (el.directives || (el.directives = [])).push(rangeSetItem({
     name,
@@ -60,21 +78,21 @@ export function addDirective (
   el.plain = false
 }
 
-function prependModifierMarker (symbol: string, name: string, dynamic?: boolean): string {
-  return dynamic
-    ? `_p(${name},"${symbol}")`
-    : symbol + name // mark the event as captured
+function prependModifierMarker(symbol: string, name: string, dynamic ? : boolean): string {
+  return dynamic ?
+    `_p(${name},"${symbol}")` :
+    symbol + name // mark the event as captured
 }
 
-export function addHandler (
+export function addHandler(
   el: ASTElement,
   name: string,
   value: string,
-  modifiers: ?ASTModifiers,
-  important?: boolean,
-  warn?: ?Function,
-  range?: Range,
-  dynamic?: boolean
+  modifiers: ? ASTModifiers,
+  important ? : boolean,
+  warn ? : ? Function,
+  range ? : Range,
+  dynamic ? : boolean
 ) {
   modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
@@ -93,6 +111,7 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
+  // FLAG：根据 modifier 修饰符对事件名 name 做处理：for浏览器兼容性问题
   if (modifiers.right) {
     if (dynamic) {
       name = `(${name})==='click'?'contextmenu':(${name})`
@@ -108,7 +127,7 @@ export function addHandler (
     }
   }
 
-  // check capture modifier
+  // check capture modifier 
   if (modifiers.capture) {
     delete modifiers.capture
     name = prependModifierMarker('!', name, dynamic)
@@ -122,7 +141,7 @@ export function addHandler (
     delete modifiers.passive
     name = prependModifierMarker('&', name, dynamic)
   }
-
+  //FLAG：2 根据 modifier.native 判断是一个纯原生事件还是普通事件
   let events
   if (modifiers.native) {
     delete modifiers.native
@@ -131,11 +150,14 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = rangeSetItem({ value: value.trim(), dynamic }, range)
+  const newHandler: any = rangeSetItem({
+    value: value.trim(),
+    dynamic
+  }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
-
+  //FLAG：3 按照 name 对事件做归类，并把回调函数的字符串保留到对应的事件中。
   const handlers = events[name]
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {
@@ -149,7 +171,7 @@ export function addHandler (
   el.plain = false
 }
 
-export function getRawBindingAttr (
+export function getRawBindingAttr(
   el: ASTElement,
   name: string
 ) {
@@ -158,11 +180,11 @@ export function getRawBindingAttr (
     el.rawAttrsMap[name]
 }
 
-export function getBindingAttr (
+export function getBindingAttr(
   el: ASTElement,
   name: string,
-  getStatic?: boolean
-): ?string {
+  getStatic ? : boolean
+): ? string {
   const dynamicValue =
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
@@ -180,11 +202,11 @@ export function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
-export function getAndRemoveAttr (
+export function getAndRemoveAttr(
   el: ASTElement,
   name: string,
-  removeFromMap?: boolean
-): ?string {
+  removeFromMap ? : boolean
+) : ? string {
   let val
   if ((val = el.attrsMap[name]) != null) {
     const list = el.attrsList
@@ -201,7 +223,7 @@ export function getAndRemoveAttr (
   return val
 }
 
-export function getAndRemoveAttrByRegex (
+export function getAndRemoveAttrByRegex(
   el: ASTElement,
   name: RegExp
 ) {
@@ -215,9 +237,12 @@ export function getAndRemoveAttrByRegex (
   }
 }
 
-function rangeSetItem (
+function rangeSetItem(
   item: any,
-  range?: { start?: number, end?: number }
+  range ? : {
+    start ? : number,
+    end ? : number
+  }
 ) {
   if (range) {
     if (range.start != null) {

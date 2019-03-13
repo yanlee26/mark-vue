@@ -50,7 +50,7 @@ function decodeAttr (value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   return value.replace(re, match => decodingMap[match])
 }
-
+// 解析 HTML 模板
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
@@ -178,7 +178,7 @@ export function parseHTML (html, options) {
 
   // Clean up any remaining tags
   parseEndTag()
-
+  // 当前解析指向
   function advance (n) {
     index += n
     html = html.substring(n)

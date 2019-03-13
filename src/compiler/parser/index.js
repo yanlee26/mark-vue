@@ -74,12 +74,13 @@ export function createASTElement (
 }
 
 /**
- * Convert HTML string to AST.
+ * Convert HTML string to AST，以用JS对象的形式来描述html模板.
  */
 export function parse (
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
+  // FLAG 1. 从 options 中获取方法和配置
   warn = options.warn || baseWarn
 
   platformIsPreTag = options.isPreTag || no
@@ -753,7 +754,7 @@ function processComponent (el) {
     el.inlineTemplate = true
   }
 }
-
+//属性处理
 function processAttrs (el) {
   const list = el.attrsList
   let i, l, name, rawName, value, modifiers, syncGen, isDynamic
@@ -761,11 +762,11 @@ function processAttrs (el) {
     name = rawName = list[i].name
     value = list[i].value
     if (dirRE.test(name)) {
-      // mark element as dynamic
+      // mark element as dynamic标记元素为动态
       el.hasBindings = true
-      // modifiers
+      // modifiers修饰符
       modifiers = parseModifiers(name.replace(dirRE, ''))
-      // support .foo shorthand syntax for the .prop modifier
+      // support .foo shorthand syntax for the .prop modifier简写
       if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
         (modifiers || (modifiers = {})).prop = true
         name = `.` + name.slice(1).replace(modifierRE, '')

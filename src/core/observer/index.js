@@ -200,7 +200,7 @@ export function defineReactive (
   })
 }
 
-/**
+/**vue.set 类似polymer的
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.

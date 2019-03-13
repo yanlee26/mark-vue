@@ -7,7 +7,7 @@ import { def } from '../util/index'
 
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
-
+// Vue fucked  Array's  native methods here, Very Similiarly with Angular and Polyer...
 const methodsToPatch = [
   'push',
   'pop',

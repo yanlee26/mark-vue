@@ -215,7 +215,7 @@ export function genFor (
       `return ${(altGen || genElement)(el, state)}` +
     '})'
 }
-
+//根据 AST 元素节点上的 events 和 nativeEvents 生成 data 数据
 export function genData (el: ASTElement, state: CodegenState): string {
   let data = '{'
 
@@ -255,7 +255,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   if (el.props) {
     data += `domProps:${genProps(el.props)},`
   }
-  // event handlers
+  // event handlers句柄们：
   if (el.events) {
     data += `${genHandlers(el.events, false)},`
   }
@@ -459,7 +459,7 @@ function genScopedSlot (
   const reverseProxy = slotScope ? `` : `,proxy:true`
   return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
-
+// 生成children
 export function genChildren (
   el: ASTElement,
   state: CodegenState,
