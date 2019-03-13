@@ -5,6 +5,7 @@ import { forEachValue, isObject, isPromise, assert } from './util'
 
 let Vue // bind on install
 
+//初始化模块，安装模块和初始化 store._vm
 export class Store {
   constructor (options = {}) {
     // Auto install if it is not done yet and `window` has `Vue`.
@@ -31,6 +32,7 @@ export class Store {
     this._actionSubscribers = []
     this._mutations = Object.create(null)
     this._wrappedGetters = Object.create(null)
+    //模块的设计就是一个树型结构，store 本身可以理解为一个 root module，它下面的 modules 就是子模块
     this._modules = new ModuleCollection(options)
     this._modulesNamespaceMap = Object.create(null)
     this._subscribers = []
@@ -51,8 +53,8 @@ export class Store {
 
     const state = this._modules.root.state
 
-    // init root module.
-    // this also recursively registers all sub-modules
+    // init root module.初始化根module
+    // this also recursively registers all sub-modules：也递归地注册所有sub-modules和收集在this._wrappedGetters里的所有module的getters
     // and collects all module getters inside this._wrappedGetters
     installModule(this, state, [], this._modules.root)
 
@@ -78,7 +80,7 @@ export class Store {
       assert(false, `use store.replaceState() to explicit replace store state.`)
     }
   }
-
+//让我们提交一个 mutation
   commit (_type, _payload, _options) {
     // check object-style commit
     const {
@@ -100,6 +102,8 @@ export class Store {
         handler(payload)
       })
     })
+    //NOTE: mutation 函数也就是对当前模块的 state 做修改。mutation 必须是同步函数,
+    // action 类似于 mutation，不同在于 action 提交的是 mutation，而不是直接操作 state，并且它可以包含任意异步操作
     this._subscribers.forEach(sub => sub(mutation, this.state))
 
     if (
@@ -112,7 +116,7 @@ export class Store {
       )
     }
   }
-
+  //提交一个 action:action 比我们自己写一个函数执行异步操作然后提交 muataion 的好处是在于它可以在参数中获取到当前模块的一些方法和状态
   dispatch (_type, _payload) {
     // check object-style dispatch
     const {
@@ -255,7 +259,7 @@ function resetStoreVM (store, state, hot) {
   const wrappedGetters = store._wrappedGetters
   const computed = {}
   forEachValue(wrappedGetters, (fn, key) => {
-    // use computed to leverage its lazy-caching mechanism
+    // use computed to leverage its lazy-caching mechanism：利用computed去获得其lazy-cache机制
     computed[key] = () => fn(store)
     Object.defineProperty(store.getters, key, {
       get: () => store._vm[key],
@@ -292,7 +296,7 @@ function resetStoreVM (store, state, hot) {
     Vue.nextTick(() => oldVm.$destroy())
   }
 }
-
+//store 表示 root store；state 表示 root state；path 表示模块的访问路径；module 表示当前的模块，hot 表示是否是热更新
 function installModule (store, rootState, path, module, hot) {
   const isRoot = !path.length
   const namespace = store._modules.getNamespace(path)
@@ -310,7 +314,7 @@ function installModule (store, rootState, path, module, hot) {
       Vue.set(parentState, moduleName, module.state)
     })
   }
-
+  //构造了一个本地上下文环境
   const local = module.context = makeLocalContext(store, namespace, path)
 
   module.forEachMutation((mutation, key) => {
@@ -337,6 +341,7 @@ function installModule (store, rootState, path, module, hot) {
 /**
  * make localized dispatch, commit, getters and state
  * if there is no namespace, just use root ones
+ * 如果没有namespace，就用根上的，本地化dispatch, commit, getters and state
  */
 function makeLocalContext (store, namespace, path) {
   const noNamespace = namespace === ''

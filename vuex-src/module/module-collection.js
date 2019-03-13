@@ -1,19 +1,22 @@
 import Module from './module'
-import { assert, forEachValue } from '../util'
+import {
+  assert,
+  forEachValue
+} from '../util'
 
 export default class ModuleCollection {
-  constructor (rawRootModule) {
+  constructor(rawRootModule) {
     // register root module (Vuex.Store options)
     this.register([], rawRootModule, false)
   }
 
-  get (path) {
+  get(path) {
     return path.reduce((module, key) => {
       return module.getChild(key)
     }, this.root)
   }
 
-  getNamespace (path) {
+  getNamespace(path) {
     let module = this.root
     return path.reduce((namespace, key) => {
       module = module.getChild(key)
@@ -21,11 +24,12 @@ export default class ModuleCollection {
     }, '')
   }
 
-  update (rawRootModule) {
+  update(rawRootModule) {
     update([], this.root, rawRootModule)
   }
-
-  register (path, rawModule, runtime = true) {
+  //要构建一颗模块树，path 是在构建树的过程中维护的路径
+  // rawModule 表示定义模块的原始配置；runtime 表示是否是一个运行时创建的模块
+  register(path, rawModule, runtime = true) {
     if (process.env.NODE_ENV !== 'production') {
       assertRawModule(path, rawModule)
     }
@@ -46,7 +50,7 @@ export default class ModuleCollection {
     }
   }
 
-  unregister (path) {
+  unregister(path) {
     const parent = this.get(path.slice(0, -1))
     const key = path[path.length - 1]
     if (!parent.getChild(key).runtime) return
@@ -55,7 +59,7 @@ export default class ModuleCollection {
   }
 }
 
-function update (path, targetModule, newModule) {
+function update(path, targetModule, newModule) {
   if (process.env.NODE_ENV !== 'production') {
     assertRawModule(path, newModule)
   }
@@ -101,7 +105,7 @@ const assertTypes = {
   actions: objectAssert
 }
 
-function assertRawModule (path, rawModule) {
+function assertRawModule(path, rawModule) {
   Object.keys(assertTypes).forEach(key => {
     if (!rawModule[key]) return
 
@@ -116,7 +120,7 @@ function assertRawModule (path, rawModule) {
   })
 }
 
-function makeAssertionMessage (path, key, type, value, expected) {
+function makeAssertionMessage(path, key, type, value, expected) {
   let buf = `${key} should be ${expected} but "${key}.${type}"`
   if (path.length > 0) {
     buf += ` in module "${path.join('.')}"`
